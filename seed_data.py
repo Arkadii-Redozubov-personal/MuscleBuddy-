@@ -1,0 +1,639 @@
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+django.setup()
+
+from exercises.models import Exercise
+from workout_plan.models import TrainingPlan, TrainingDay
+from useful_materials.models import Useful_Materials
+
+def seed():
+    print("Starting exact image-to-exercise data seed...")
+
+    # 1. Exercises with verified exact matching photos & videos
+    exercises_data = [
+        # CHEST
+        {
+            "name": "Barbell Bench Press",
+            "description": "Lie flat on the bench with eyes under the bar. Grip slightly wider than shoulder width. Lower bar smoothly to mid-chest, pause briefly, then press explosively upward.",
+            "description_set": "4 sets x 8-10 reps (90s rest)",
+            "photo": "training_days/bench_press.jpg",
+            "video_file": "exercise_videos/How_to_PROPERLY_Bench_Press_for_Growth_5_Easy_Steps.mp4",
+            "order": 1,
+            "category": "chest"
+        },
+        {
+            "name": "Incline Barbell Bench Press",
+            "description": "Set bench to 30-45 degrees to target upper clavicular head of pectorals. Maintain retracted scapulae and drive through palms.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/incline-barbell-bench-press-resized.webp",
+            "video_file": "exercise_videos/How_to_PROPERLY_Bench_Press_for_Growth_5_Easy_Steps.mp4",
+            "order": 2,
+            "category": "chest"
+        },
+        {
+            "name": "Dumbbell Chest Press (Flat Bench)",
+            "description": "Allows deeper stretch and independent arm stabilization. Bring dumbbells down to chest height with elbows at 45 degrees.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/02891201.jpg",
+            "video_file": "exercise_videos/How_To_Dumbbell_Chest_Press.mp4",
+            "order": 3,
+            "category": "chest"
+        },
+        {
+            "name": "Incline Hammer Machine Chest Press",
+            "description": "Fixed convergence path safely overloads upper pectorals without rotator cuff strain.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/schraegbankdruecken-maschine.webp",
+            "video_file": "exercise_videos/Hammer_Machine_Chest_Press.mp4",
+            "order": 4,
+            "category": "chest"
+        },
+        {
+            "name": "Standing Cable Chest Fly",
+            "description": "Maintains continuous tension through the movement. Bring hands forward in a wide hugging motion, squeezing inner chest at peak contraction.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/Standing-Cable-Chest-Fly-750x422.webp",
+            "video_file": "exercise_videos/Cable_Flye.mp4",
+            "order": 5,
+            "category": "chest"
+        },
+        {
+            "name": "Classic Push-Up",
+            "description": "Bodyweight staple building pushing strength and core firmness. Keep body in a straight plank line from head to heels.",
+            "description_set": "3 sets to failure",
+            "photo": "training_days/push-up-tall-resized.webp",
+            "video_file": "exercise_videos/How_to_do_a_Push-Up_.mp4",
+            "order": 6,
+            "category": "chest"
+        },
+
+        # LEGS
+        {
+            "name": "Barbell Back Squat",
+            "description": "King of compound leg movements. Rest bar across traps, brace abdominal wall, descend until thighs break parallel, drive up through midfoot.",
+            "description_set": "4 sets x 6-8 reps (2m rest)",
+            "photo": "training_days/barbell-squat-resized-FIXED-2.webp",
+            "video_file": "exercise_videos/How_to_PROPERLY_Squat_for_Growth_4_Easy_Steps.mp4",
+            "order": 7,
+            "category": "legs"
+        },
+        {
+            "name": "Hack Squat",
+            "description": "Guided machine squat allowing deep quad stretch and knee flexion with safe back support.",
+            "description_set": "3 sets x 8-10 reps",
+            "photo": "training_days/0748fe254287699c2e6e153ecd157a97.jpg",
+            "video_file": "exercise_videos/Hack_Squat.mp4",
+            "order": 8,
+            "category": "legs"
+        },
+        {
+            "name": "Leg Press",
+            "description": "Heavy quad overload with minimal spinal compression. Place feet shoulder-width on platform, lower sled under control.",
+            "description_set": "4 sets x 10-12 reps",
+            "photo": "training_days/leg_pres.png",
+            "video_file": "exercise_videos/How_to_Get_Bigger_Legs_-_Fix_Your_LEG_PRESS_Technique.mp4",
+            "order": 9,
+            "category": "legs"
+        },
+        {
+            "name": "Leg Extension",
+            "description": "Pure quadriceps isolation. Extend legs until completely straight, squeeze at top for 1 full second, control the descent.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/leg-extension-simulator-on-quadriceps-260nw-421042393.webp",
+            "video_file": "exercise_videos/Leg_Extension.mp4",
+            "order": 10,
+            "category": "legs"
+        },
+        {
+            "name": "Lying Leg Curl",
+            "description": "Hamstring builder focusing on knee flexion. Keep hips pressed firmly into pad to prevent lower back compensation.",
+            "description_set": "4 sets x 10-12 reps",
+            "photo": "training_days/lying-leg-curl-resized.png",
+            "video_file": "exercise_videos/Lying_Leg_Curls_-_Leg_Exercise_-_Bodybuilding.com.mp4",
+            "order": 11,
+            "category": "legs"
+        },
+        {
+            "name": "Seated Leg Curl",
+            "description": "Places hamstrings in a lengthened position via hip flexion for enhanced muscle stimulus.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/lever-seated-leg-curl-thighs-260nw-2327161935.webp",
+            "video_file": "exercise_videos/Beginners_Guide__Seated_Leg_Curl.mp4",
+            "order": 12,
+            "category": "legs"
+        },
+        {
+            "name": "Barbell Romanian Deadlift (RDL)",
+            "description": "Supreme posterior chain movement. Hinge at hips while maintaining slight knee bend, stretch hamstrings, then squeeze glutes to lockout.",
+            "description_set": "4 sets x 8-10 reps",
+            "photo": "training_days/Barbell-Romanian-Deadlift.png",
+            "video_file": "exercise_videos/RDLs_in_reverse_hack_squat.mp4",
+            "order": 13,
+            "category": "legs"
+        },
+        {
+            "name": "Reverse Hack Squat RDL",
+            "description": "Facing the hack squat pad to hinge and aggressively overload glutes and hamstrings with stable leverage.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/lever-good-morning-on-the-hack-squat-machine-female.jpg",
+            "video_file": "exercise_videos/RDLs_in_reverse_hack_squat.mp4",
+            "order": 14,
+            "category": "legs"
+        },
+        {
+            "name": "Seated Hip Adductor",
+            "description": "Directly strengthens the adductor group of the inner thigh, enhancing knee stability and squat power.",
+            "description_set": "3 sets x 15 reps",
+            "photo": "training_days/597e79329bbe7f244adba7004301071f.jpg",
+            "video_file": "exercise_videos/Adductors_Technogym_Element.mp4",
+            "order": 15,
+            "category": "legs"
+        },
+        {
+            "name": "Walking Lunges",
+            "description": "Unilateral quad and glute exercise improving balance, hip mobility, and athletic stability.",
+            "description_set": "3 sets x 12 steps per leg",
+            "photo": "training_days/Lunge-resized.png",
+            "video_file": "exercise_videos/How_to_PROPERLY_Squat_for_Growth_4_Easy_Steps.mp4",
+            "order": 16,
+            "category": "legs"
+        },
+        {
+            "name": "Standing Calf Raise",
+            "description": "Direct gastrocnemius loading. Full stretch at bottom and high plantarflexion squeeze at top.",
+            "description_set": "4 sets x 15 reps",
+            "photo": "training_days/Lever-Standing-Calf-Raise-resized.webp",
+            "video_file": "exercise_videos/Standing_Calf_Raises_-_Calves_Exercise_-_Bodybuilding.com.mp4",
+            "order": 17,
+            "category": "legs"
+        },
+        {
+            "name": "Seated Calf Raise",
+            "description": "With bent knees, isolates the deep soleus muscle of the lower leg.",
+            "description_set": "3 sets x 15-20 reps",
+            "photo": "training_days/Lever-Seated-Calf-Raise-plate-loaded-resized.webp",
+            "video_file": "exercise_videos/Standing_Calf_Raises_-_Calves_Exercise_-_Bodybuilding.com.mp4",
+            "order": 18,
+            "category": "legs"
+        },
+
+        # BACK
+        {
+            "name": "Wide-Grip Lat Pulldown",
+            "description": "Broad grip targeting lat width. Pull elbows straight down toward hips while leaning back slightly and elevating sternum.",
+            "description_set": "4 sets x 10-12 reps",
+            "photo": "training_days/wide-grip-lat-pull-down-resized.png",
+            "video_file": "exercise_videos/How_To_Do_A_Lat_Pulldown.mp4",
+            "order": 19,
+            "category": "back"
+        },
+        {
+            "name": "Close-Grip Lat Pulldown",
+            "description": "Neutral V-bar grip creating longer lat stretch and lower lat engagement.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/Cable-close-grip-pull-down-resized_1.webp",
+            "video_file": "exercise_videos/Close_Grip_Lat_Pulldown_Form__6_Quick_Tips.mp4",
+            "order": 20,
+            "category": "back"
+        },
+        {
+            "name": "Hammer Strength ISO-Lateral Lat Pulldown",
+            "description": "Diverging path matches natural arm movement for optimal lat fiber alignment.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/Wide-Grip-Lat-Pulldown-Machine-scaled.jpg",
+            "video_file": "exercise_videos/ISO-Lateral_Pulldown_Hammer_Strength.mp4",
+            "order": 21,
+            "category": "back"
+        },
+        {
+            "name": "Barbell Bent-Over Row",
+            "description": "Hinge at hips, keep spine rigid, pull bar to lower ribcage while driving elbows back.",
+            "description_set": "4 sets x 8-10 reps",
+            "photo": "training_days/Bent-over-barbell-row.png",
+            "video_file": "exercise_videos/Barbell_Bent_Over_Row.mp4",
+            "order": 22,
+            "category": "back"
+        },
+        {
+            "name": "Chest-Supported Machine Row",
+            "description": "Isolates rhomboids and mid-back without spinal load or lower back fatigue.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/chest_supported_row_muscles_worked_600x600.webp",
+            "video_file": "exercise_videos/Chest-Supported_Row.mp4",
+            "order": 23,
+            "category": "back"
+        },
+        {
+            "name": "Hammer Strength Row",
+            "description": "Heavy plate-loaded machine row providing stable lat and upper back overload.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/2edbed_47dae6ef1f984fa7890d4350c00340admv2.webp",
+            "video_file": "exercise_videos/How_To__Hammer_Strength_Row.mp4",
+            "order": 24,
+            "category": "back"
+        },
+        {
+            "name": "Seated Cable Row",
+            "description": "Sit upright, pull handle to belly button, retract shoulder blades and pause for 1 second.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/Seated-cable-row-new-resized.png",
+            "video_file": "exercise_videos/Cable_Low_Pulley_Seated_Row.mp4",
+            "order": 25,
+            "category": "back"
+        },
+        {
+            "name": "Single-Arm Dumbbell Row",
+            "description": "Unilateral row correcting imbalances while delivering massive lats stretch and peak contraction.",
+            "description_set": "3 sets x 10-12 reps per arm",
+            "photo": "training_days/bent-over-one-arm-dumbbell-row-resized.png",
+            "video_file": "exercise_videos/How_To__Hammer_Strength_Row.mp4",
+            "order": 26,
+            "category": "back"
+        },
+        {
+            "name": "Incline Prone Dumbbell Row",
+            "description": "Lying chest-down on incline bench, pulling dumbbells up to isolate rhomboids and rear delts.",
+            "description_set": "3 sets x 12 reps",
+            "photo": "training_days/459_M.png",
+            "video_file": "exercise_videos/Chest-Supported_Row.mp4",
+            "order": 27,
+            "category": "back"
+        },
+        {
+            "name": "Straight-Arm Cable Pullover",
+            "description": "Lat isolation movement that completely bypasses bicep involvement.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/how_to_do_cable_pullover_480x480.webp",
+            "video_file": "exercise_videos/Cable_pullover_-_Rope.mp4",
+            "order": 28,
+            "category": "back"
+        },
+        {
+            "name": "Pull-Ups",
+            "description": "Classic bodyweight exercise for lat width, upper back thickness, and grip strength.",
+            "description_set": "3 sets to failure",
+            "photo": "training_days/pull-up-2-resized.webp",
+            "video_file": "exercise_videos/ISO-Lateral_Pulldown_Hammer_Strength.mp4",
+            "order": 29,
+            "category": "back"
+        },
+
+        # SHOULDERS & TRAPS
+        {
+            "name": "Seated Dumbbell Shoulder Press",
+            "description": "Primary shoulder mass builder. Press dumbbells overhead in an arc, touching lightly at peak.",
+            "description_set": "4 sets x 8-10 reps",
+            "photo": "training_days/Без_названия.jfif",
+            "video_file": "exercise_videos/How_to_Do_Seated_Overhead_Dumbbell_Press__Arm_Workout.mp4",
+            "order": 30,
+            "category": "shoulders"
+        },
+        {
+            "name": "Smith Machine Overhead Shoulder Press",
+            "description": "Guided vertical press enabling safe overload of anterior and lateral deltoid fibers.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/Smith-machine-seated-overhead-press-resized.webp",
+            "video_file": "exercise_videos/Smith_Machine_Seated_Shoulder_Press.mp4",
+            "order": 31,
+            "category": "shoulders"
+        },
+        {
+            "name": "Machine Lateral Deltoid Raise",
+            "description": "Isolates the lateral deltoids through fixed lever resistance for incredible shoulder width.",
+            "description_set": "4 sets x 12-15 reps",
+            "photo": "training_days/2_e4e0a1a7-bfcd-4f9c-915d-4208cdbb6a08.webp",
+            "video_file": "exercise_videos/Best_Shoulder_Deltoid_Exercises_To_Build_Bigger_Shoulder_Deltoids_Muscle_.mp4",
+            "order": 32,
+            "category": "shoulders"
+        },
+        {
+            "name": "Seated Dumbbell Lateral Raise",
+            "description": "Prevents leg drive momentum to deliver strict tension directly onto lateral deltoids.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/eba177e9b32742af4bdbc8be0d5f82d6.jpg",
+            "video_file": "exercise_videos/Best_Shoulder_Deltoid_Exercises_To_Build_Bigger_Shoulder_Deltoids_Muscle_.mp4",
+            "order": 33,
+            "category": "shoulders"
+        },
+        {
+            "name": "Standing Cable Lateral Raise",
+            "description": "Constant side-delt tension through abduction creating the desirable broad-shoulder silhouette.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/cable-one-arm-lateral-raise-1-750x474.jpg.webp",
+            "video_file": "exercise_videos/Best_Shoulder_Deltoid_Exercises_To_Build_Bigger_Shoulder_Deltoids_Muscle_.mp4",
+            "order": 34,
+            "category": "shoulders"
+        },
+        {
+            "name": "Reverse Pec Dec (Rear Delt Fly)",
+            "description": "Isolates rear deltoids and upper back stabilizers to balance shoulder posture.",
+            "description_set": "4 sets x 12-15 reps",
+            "photo": "training_days/reverse-butterfly-maschine.webp",
+            "video_file": "exercise_videos/How_to_Reverse_Pec_dec.mp4",
+            "order": 35,
+            "category": "shoulders"
+        },
+        {
+            "name": "Dumbbell Shrugs (Trapezius)",
+            "description": "Direct upper trapezius builder. Elevate shoulders straight up toward ears, hold, and lower under control.",
+            "description_set": "4 sets x 12-15 reps",
+            "photo": "training_days/exercise-40_1000x.webp",
+            "video_file": "exercise_videos/How_To_Do_Dumbbell_Shrugs_For_Meaty_Traps.mp4",
+            "order": 36,
+            "category": "shoulders"
+        },
+
+        # ARMS
+        {
+            "name": "Cable Triceps Pushdown",
+            "description": "Locks upper arms in place while extending elbows, placing maximum stress on the lateral and medial triceps heads.",
+            "description_set": "3 sets x 12-15 reps",
+            "photo": "training_days/cable_Press_down_1.webp",
+            "video_file": "exercise_videos/Cable_Triceps_Pushdown.mp4",
+            "order": 37,
+            "category": "arms"
+        },
+        {
+            "name": "Lying French Press / Skullcrushers",
+            "description": "EZ-bar extension targeting long head of triceps for deep stretch and triceps mass.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/french-press-barbell-lying-3d-260nw-419748157.webp",
+            "video_file": "exercise_videos/French_bench_press.mp4",
+            "order": 38,
+            "category": "arms"
+        },
+        {
+            "name": "Standing Dumbbell Bicep Curl",
+            "description": "Supinate wrists on upward phase to recruit both heads of biceps brachii.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/Без_названия_HF8ffoG.jfif",
+            "video_file": "exercise_videos/How_to_Do_Standing_Dumbbell_Curls.mp4",
+            "order": 39,
+            "category": "arms"
+        },
+        {
+            "name": "Low Pulley Cable Bicep Curl",
+            "description": "Continuous cable tension keeps bicep peaked through both contraction and elongation.",
+            "description_set": "3 sets x 12 reps",
+            "photo": "training_days/1630.png",
+            "video_file": "exercise_videos/Cable_Low_Pulley_Straight_Bar_Supinated_Bicep_Curl.mp4",
+            "order": 40,
+            "category": "arms"
+        },
+        {
+            "name": "EZ-Bar Bicep Curl",
+            "description": "Allows heavy bicep loading with reduced wrist tension.",
+            "description_set": "3 sets x 10-12 reps",
+            "photo": "training_days/EZ-Bar-Reverse-Curl_600x600.webp",
+            "video_file": "exercise_videos/EZ_Bar_Curls_How_To_Perform_Them_Correctly.mp4",
+            "order": 41,
+            "category": "arms"
+        },
+
+        # CORE, WARM-UP & CARDIO
+        {
+            "name": "Abdominal Crunches",
+            "description": "Controlled spinal flexion emphasizing upper and mid rectus abdominis.",
+            "description_set": "4 sets x 20 reps",
+            "photo": "training_days/abs_crunches.png",
+            "video_file": "exercise_videos/What_Happens_to_Your_Body_When_You_Do_Ab_Crunches_Every_Day.mp4",
+            "order": 42,
+            "category": "core"
+        },
+        {
+            "name": "Upper Body Dynamic Warm-Up",
+            "description": "Essential joint and rotator cuff preparation prior to heavy pushing and pulling.",
+            "description_set": "5-8 minutes continuous flow",
+            "photo": "training_days/1000_F_279816794_xu5Fjj5v0DEyPw3rT63RdQWcxKHa2qlq.jpg",
+            "video_file": "exercise_videos/The_ONLY_Upper_Body_Warm_Up_You_Need_QUICK_AND_EFFECTIVE.mp4",
+            "order": 43,
+            "category": "warmup"
+        },
+        {
+            "name": "Lower Body Dynamic Warm-Up",
+            "description": "Pre-squat activation targeting hips, glutes, adductors, and hamstrings.",
+            "description_set": "2 rounds x 10 reps each",
+            "photo": "training_days/Screenshot_2024-12-24_231337.jpg",
+            "video_file": "exercise_videos/The_BEST_Leg_Day_Warm-Up_5_Minutes_or_LESS.mp4",
+            "order": 44,
+            "category": "warmup"
+        },
+        {
+            "name": "Elliptical Cardio Conditioning",
+            "description": "Low impact cardiovascular work promoting stamina, fat burn, and recovery.",
+            "description_set": "15-20 min steady state",
+            "photo": "training_days/v4-460px-Use-an-Elliptical-Machine-Step-3-Version-2.jpg.jfif",
+            "video_file": "exercise_videos/Elliptical_Instruction_101__Technique_and_Tips.mp4",
+            "order": 45,
+            "category": "cardio"
+        },
+        {
+            "name": "Stationary Exercise Bike",
+            "description": "Efficient aerobic conditioning and quad flushing with minimal joint impact.",
+            "description_set": "15-20 min steady state / HIIT intervals",
+            "photo": "training_days/getty_d726eb685d1a42aea5b34456e6eb1b55.jpg",
+            "video_file": "exercise_videos/How_to_Correctly__Effectively_Use_Your_Exercise_Bike.mp4",
+            "order": 46,
+            "category": "cardio"
+        },
+        {
+            "name": "Treadmill Cardio Run",
+            "description": "Endurance running improving metabolic efficiency, fat loss, and heart health.",
+            "description_set": "20-30 minutes steady pace",
+            "photo": "training_days/360_F_159083290_2s07mwlIuMXzwlVVt4Rhkgh4k5EqqIoj.jpg",
+            "video_file": "exercise_videos/What_Happens_To_Your_Body_When_You_Run_30_Minutes_Every_Day.mp4",
+            "order": 47,
+            "category": "cardio"
+        }
+    ]
+
+    # Clear old exercises and re-seed with clean precision
+    Exercise.objects.all().delete()
+    exercise_objects = {}
+
+    for item in exercises_data:
+        cat = item.pop("category")
+        ex = Exercise.objects.create(**item)
+        exercise_objects[ex.name] = ex
+
+    print(f"Seeded {len(exercise_objects)} strictly verified exercises.")
+
+    # 2. Useful Materials - exact image matching
+    Useful_Materials.objects.all().delete()
+    materials_data = [
+        {
+            "title": "Arnold's Top 10 Tips for Bodybuilding",
+            "description": "Timeless advice from 7-time Mr. Olympia on mindset, training intensity, proper form, and nutrition for continuous muscle growth.",
+            "video": "meterials_video/Arnolds_Top_10_Tips_for_Bodybuilding.mp4",
+            "image": "materials_photo/1_7Zj8iEUoXL99UkfXnYOiJA.jpg",  # Arnold photo
+            "app_link_name": "Arnold's Pump Club",
+            "app_link": "https://arnoldspumpclub.com"
+        },
+        {
+            "title": "What Steroids Do to the Body",
+            "description": "An essential scientific breakdown of anabolic compounds, cardiovascular impacts, hormonal side effects, and why natural training builds sustainable health.",
+            "video": "meterials_video/What_Steroids_Do_to_the_Body.mp4",
+            "image": "materials_photo/iStock-1250471462.jpg",  # Steroid injection bottle photo
+            "app_link_name": "Bodybuilding.com Articles",
+            "app_link": "https://www.bodybuilding.com"
+        },
+        {
+            "title": "Nutrition & Macro Mastery",
+            "description": "Learn how to calibrate protein (2.2g/kg), dietary fats, and complex carbohydrates to match your body composition goals.",
+            "video": "meterials_video/videoplayback.mp4",
+            "image": "materials_photo/Без_названия.jfif",  # Diet plan & fresh fruits photo
+            "app_link_name": "Calculate Your Macros",
+            "app_link": "/nutrition_calculator/"
+        }
+    ]
+
+    for mat in materials_data:
+        Useful_Materials.objects.create(**mat)
+    print(f"Seeded {len(materials_data)} useful materials with exact image matches.")
+
+    # 3. Training Plans
+    genders = ['male', 'female']
+    experiences = ['beginner', 'fan', 'pro']
+    intensities = ['low', 'medium', 'high']
+
+    plan_count = 0
+    day_count = 0
+
+    TrainingPlan.objects.all().delete()
+
+    for g in genders:
+        for exp in experiences:
+            for intensity in intensities:
+                plan_name = f"{g.title()} {exp.title()} ({intensity.title()})"
+                desc = (
+                    f"A comprehensive {intensity}-intensity bodybuilding plan tailored for {exp} {g} athletes. "
+                    f"Optimized for progressive overload, muscular balance, and optimal recovery."
+                )
+                plan = TrainingPlan.objects.create(
+                    gender=g,
+                    experience=exp,
+                    intensity=intensity,
+                    name=plan_name,
+                    description=desc
+                )
+                plan_count += 1
+
+                # Days setup
+                if intensity == 'low':
+                    # 2 days: Push / Pull + Legs
+                    schedule = [
+                        ('monday', 'Upper Body Power', [
+                            'Upper Body Dynamic Warm-Up',
+                            'Barbell Bench Press',
+                            'Barbell Bent-Over Row',
+                            'Seated Dumbbell Shoulder Press',
+                            'Cable Triceps Pushdown',
+                            'Standing Dumbbell Bicep Curl'
+                        ]),
+                        ('thursday', 'Lower Body & Core', [
+                            'Lower Body Dynamic Warm-Up',
+                            'Barbell Back Squat',
+                            'Barbell Romanian Deadlift (RDL)',
+                            'Leg Extension',
+                            'Standing Calf Raise',
+                            'Abdominal Crunches'
+                        ])
+                    ]
+                elif intensity == 'medium':
+                    # 3 days: Push / Pull / Legs
+                    schedule = [
+                        ('monday', 'Chest & Triceps Focus', [
+                            'Upper Body Dynamic Warm-Up',
+                            'Barbell Bench Press',
+                            'Incline Barbell Bench Press',
+                            'Dumbbell Chest Press (Flat Bench)',
+                            'Standing Cable Chest Fly',
+                            'Cable Triceps Pushdown',
+                            'Lying French Press / Skullcrushers'
+                        ]),
+                        ('wednesday', 'Back & Biceps Focus', [
+                            'Wide-Grip Lat Pulldown',
+                            'Close-Grip Lat Pulldown',
+                            'Barbell Bent-Over Row',
+                            'Hammer Strength Row',
+                            'Low Pulley Cable Bicep Curl',
+                            'Standing Dumbbell Bicep Curl'
+                        ]),
+                        ('friday', 'Legs, Shoulders & Core', [
+                            'Lower Body Dynamic Warm-Up',
+                            'Barbell Back Squat',
+                            'Leg Press',
+                            'Lying Leg Curl',
+                            'Machine Lateral Deltoid Raise',
+                            'Seated Dumbbell Shoulder Press',
+                            'Abdominal Crunches'
+                        ])
+                    ]
+                else:
+                    # 5-day Pro split
+                    schedule = [
+                        ('monday', 'Chest Hypertrophy', [
+                            'Upper Body Dynamic Warm-Up',
+                            'Barbell Bench Press',
+                            'Incline Barbell Bench Press',
+                            'Incline Hammer Machine Chest Press',
+                            'Dumbbell Chest Press (Flat Bench)',
+                            'Standing Cable Chest Fly',
+                            'Classic Push-Up'
+                        ]),
+                        ('tuestday', 'Back Thickness & Width', [
+                            'Hammer Strength ISO-Lateral Lat Pulldown',
+                            'Wide-Grip Lat Pulldown',
+                            'Close-Grip Lat Pulldown',
+                            'Barbell Bent-Over Row',
+                            'Hammer Strength Row',
+                            'Chest-Supported Machine Row',
+                            'Straight-Arm Cable Pullover'
+                        ]),
+                        ('wednesday', 'Quad & Hamstring Domination', [
+                            'Lower Body Dynamic Warm-Up',
+                            'Barbell Back Squat',
+                            'Hack Squat',
+                            'Leg Press',
+                            'Leg Extension',
+                            'Lying Leg Curl',
+                            'Seated Leg Curl',
+                            'Seated Hip Adductor',
+                            'Standing Calf Raise'
+                        ]),
+                        ('thursday', 'Shoulders & Traps Blitz', [
+                            'Seated Dumbbell Shoulder Press',
+                            'Smith Machine Overhead Shoulder Press',
+                            'Machine Lateral Deltoid Raise',
+                            'Seated Dumbbell Lateral Raise',
+                            'Reverse Pec Dec (Rear Delt Fly)',
+                            'Dumbbell Shrugs (Trapezius)'
+                        ]),
+                        ('friday', 'Arms & Conditioning Shred', [
+                            'Standing Dumbbell Bicep Curl',
+                            'Low Pulley Cable Bicep Curl',
+                            'EZ-Bar Bicep Curl',
+                            'Cable Triceps Pushdown',
+                            'Lying French Press / Skullcrushers',
+                            'Abdominal Crunches',
+                            'Treadmill Cardio Run'
+                        ])
+                    ]
+
+                for day_code, day_desc, ex_list in schedule:
+                    day = TrainingDay.objects.create(
+                        day=day_code,
+                        training_plan=plan,
+                        description=day_desc
+                    )
+                    assigned = [exercise_objects[e] for e in ex_list if e in exercise_objects]
+                    day.exercises.set(assigned)
+                    day_count += 1
+
+    print(f"Seeded {plan_count} training plans with {day_count} training days.")
+    print("Exact matching seed complete!")
+
+if __name__ == '__main__':
+    seed()
