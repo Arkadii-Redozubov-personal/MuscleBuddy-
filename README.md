@@ -1,5 +1,7 @@
 # Muscle Buddy
 
+Live Demo: https://musclebuddy.onrender.com
+
 A web application for workout planning, exercise execution, and nutrition calculation built with Django.
 
 ## Features
