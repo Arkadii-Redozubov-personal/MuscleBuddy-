@@ -28,6 +28,7 @@ SECRET_KEY = 'django-insecure-^68+_o=8=duh!_g4vs)^fgp3$vud1gw_53q@cp@ywys5bsc5am
 DEBUG = True
 
 ALLOWED_HOSTS = ['.onrender.com', '127.0.0.1', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://musclebuddy.onrender.com']
 
 
 
@@ -51,8 +52,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,8 +93,13 @@ DATABASES = {
     }
 }
 
-# DATABASES['default'] = dj_database_url.parse("postgresql://prettyprinted_django_render_090b_user:a5DBJeTpH7p6WHHJ45T1L17WW3WNNCr3@dpg-ctmr1n3tq21c73fbgb7g-a.frankfurt-postgres.render.com/prettyprinted_django_render_090b")
-#postgresql://prettyprinted_django_render_090b_user:a5DBJeTpH7p6WHHJ45T1L17WW3WNNCr3@dpg-ctmr1n3tq21c73fbgb7g-a.frankfurt-postgres.render.com/prettyprinted_django_render_090b
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
